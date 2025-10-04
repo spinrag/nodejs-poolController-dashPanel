@@ -76,6 +76,7 @@
     <link id="cssref_widgets" rel="stylesheet" type="text/css" href="themes/widgets.css" />
     <link id="cssref_config" rel="stylesheet" type="text/css" href="themes/configPage.css" />
     <link id="cssref_dash" rel="stylesheet" type="text/css" href="themes/dashboard.css" />
+    <link id="cssref_ios_safe" rel="stylesheet" type="text/css" href="themes/ios-safe-area.css" />
     <script type="text/javascript">
         $(document).ready(function () {
             // Add in the current theme for the pool controller.
@@ -107,7 +108,8 @@
             
             // iOS specific: Check if running in standalone mode
             if (window.navigator.standalone === true) {
-                console.log('Running as iOS standalone app');
+                console.log('Running as iOS standalone app - applying safe area styles');
+                document.body.classList.add('ios-standalone');
             }
         });
         
