@@ -158,6 +158,17 @@ export class HttpServer extends ProtoServer {
             this.app.use('/scripts', express.static(path.join(process.cwd(), '/scripts/'), { maxAge: '1d' }));
             this.app.use('/themes', express.static(path.join(process.cwd(), '/themes/'), { maxAge: '1d' }));
             this.app.use('/icons', express.static(path.join(process.cwd(), '/themes/icons'), { maxAge: '1d' }));
+            
+            // PWA specific routes
+            this.app.get('/manifest.json', (req, res) => {
+                res.setHeader('Content-Type', 'application/json');
+                res.sendFile(path.join(process.cwd(), '/pages/manifest.json'));
+            });
+            
+            this.app.get('/sw.js', (req, res) => {
+                res.setHeader('Content-Type', 'application/javascript');
+                res.sendFile(path.join(process.cwd(), '/pages/sw.js'));
+            });
             RelayRoute.initRoutes(this.app);
             ConfigRoute.initRoutes(this.app);
             MessagesRoute.initRoutes(this.app);
@@ -320,6 +331,17 @@ export class HttpsServer extends HttpServer {
             this.app.use('/scripts', express.static(path.join(process.cwd(), '/scripts/'), { maxAge: '1d' }));
             this.app.use('/themes', express.static(path.join(process.cwd(), '/themes/'), { maxAge: '1d' }));
             this.app.use('/icons', express.static(path.join(process.cwd(), '/themes/icons'), { maxAge: '1d' }));
+            
+            // PWA specific routes
+            this.app.get('/manifest.json', (req, res) => {
+                res.setHeader('Content-Type', 'application/json');
+                res.sendFile(path.join(process.cwd(), '/pages/manifest.json'));
+            });
+            
+            this.app.get('/sw.js', (req, res) => {
+                res.setHeader('Content-Type', 'application/javascript');
+                res.sendFile(path.join(process.cwd(), '/pages/sw.js'));
+            });
             RelayRoute.initRoutes(this.app);
             ConfigRoute.initRoutes(this.app);
             MessagesRoute.initRoutes(this.app);

@@ -4,8 +4,28 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Pool Control Dashboard</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="application-name" content="Pool Control" />
+    <meta name="description" content="Pool Controller Dashboard - Control your pool equipment remotely" />
+    <meta name="theme-color" content="#2196F3" />
+    <meta name="msapplication-TileColor" content="#2196F3" />
+    <meta name="msapplication-navbutton-color" content="#2196F3" />
+    
+    <!-- iOS Specific Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Pool Control" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    
+    <!-- iOS Splash Screen Meta Tags -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" sizes="57x57" href="/icons/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/icons/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="/icons/apple-icon-72x72.png">
@@ -56,6 +76,7 @@
     <link id="cssref_widgets" rel="stylesheet" type="text/css" href="themes/widgets.css" />
     <link id="cssref_config" rel="stylesheet" type="text/css" href="themes/configPage.css" />
     <link id="cssref_dash" rel="stylesheet" type="text/css" href="themes/dashboard.css" />
+    <link id="cssref_mobile" rel="stylesheet" type="text/css" href="themes/mobile.css" />
     <script type="text/javascript">
         $(document).ready(function () {
             // Add in the current theme for the pool controller.
@@ -67,11 +88,133 @@
             var theme = getStorage('dashTheme', 'default');
             $('<link id="cssref_theme" rel="stylesheet" type="text/css" href="themes/' + theme + '/theme.css" />').appendTo($('head')).attr('data-theme', theme);
             var bstyle = getStorage('dashBackgroundStyle', '');
+            
+            // Register Service Worker for PWA functionality
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('Service Worker registered successfully:', registration.scope);
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', function() {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', function() {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New content is available, show update notification
+                                    showUpdateNotification();
+                                }
+                            });
+                        });
+                    })
+                    .catch(function(error) {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            }
+            
+            // PWA Installation prompt
+            let deferredPrompt;
+            window.addEventListener('beforeinstallprompt', function(e) {
+                console.log('PWA install prompt triggered');
+                e.preventDefault();
+                deferredPrompt = e;
+                showInstallButton();
+            });
+            
+            // Handle app installed event
+            window.addEventListener('appinstalled', function(e) {
+                console.log('PWA was installed');
+                hideInstallButton();
+            });
+            
+            // iOS specific: Check if running in standalone mode
+            if (window.navigator.standalone === true) {
+                console.log('Running as iOS standalone app');
+                document.body.classList.add('ios-standalone');
+            }
+            
+            // Add iOS-specific CSS for standalone mode
+            if (window.navigator.standalone === true) {
+                $('<style>')
+                    .prop('type', 'text/css')
+                    .html(`
+                        .ios-standalone {
+                            padding-top: env(safe-area-inset-top);
+                            padding-bottom: env(safe-area-inset-bottom);
+                            padding-left: env(safe-area-inset-left);
+                            padding-right: env(safe-area-inset-right);
+                        }
+                        .ios-standalone .picHeader {
+                            padding-top: calc(env(safe-area-inset-top) + 10px);
+                        }
+                    `)
+                    .appendTo('head');
+            }
         });
+        
+        // PWA Installation functions
+        function showInstallButton() {
+            if (!$('#install-button').length) {
+                $('<button id="install-button" style="position: fixed; top: 10px; right: 10px; z-index: 1000; background: #2196F3; color: white; border: none; padding: 10px 15px; border-radius: 5px; font-size: 14px;">Install App</button>')
+                    .appendTo('body')
+                    .click(function() {
+                        installPWA();
+                    });
+            }
+        }
+        
+        function hideInstallButton() {
+            $('#install-button').remove();
+        }
+        
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(function(choiceResult) {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    } else {
+                        console.log('User dismissed the install prompt');
+                    }
+                    deferredPrompt = null;
+                    hideInstallButton();
+                });
+            }
+        }
+        
+        function showUpdateNotification() {
+            if (!$('#update-notification').length) {
+                $('<div id="update-notification" style="position: fixed; top: 50px; right: 10px; z-index: 1000; background: #4CAF50; color: white; padding: 15px; border-radius: 5px; max-width: 300px;">' +
+                    '<p>New version available!</p>' +
+                    '<button onclick="updateApp()" style="background: white; color: #4CAF50; border: none; padding: 5px 10px; border-radius: 3px; margin-right: 10px;">Update</button>' +
+                    '<button onclick="$(\'#update-notification\').remove()" style="background: transparent; color: white; border: 1px solid white; padding: 5px 10px; border-radius: 3px;">Later</button>' +
+                    '</div>')
+                    .appendTo('body');
+            }
+        }
+        
+        function updateApp() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration().then(function(registration) {
+                    if (registration && registration.waiting) {
+                        registration.waiting.postMessage({type: 'SKIP_WAITING'});
+                        window.location.reload();
+                    }
+                });
+            }
+            $('#update-notification').remove();
+        }
     </script>
 </head>
 
 <body>
+    <!-- Offline indicator -->
+    <div id="offline-indicator" class="offline-indicator">
+        <span>You're offline. Some features may be limited.</span>
+    </div>
+    
+    <!-- Connection status indicator -->
+    <div id="connection-status" class="connection-status connected"></div>
+    
     <div class="dashOuter picDashboard" data-panel="dashboard">
         <header class="picHeader">
             <div class="picController picControlPanel control-panel" style="display:block;"></div>
@@ -111,7 +254,70 @@
             $('div.picChemistry').chemistry();
             $('div.picSchedules').schedules();
             $('div.picFilters').bodyFilters();
+            
+            // Connection monitoring
+            monitorConnection();
+            
+            // Offline/Online event listeners
+            window.addEventListener('online', function() {
+                console.log('Connection restored');
+                updateConnectionStatus('connected');
+                $('#offline-indicator').removeClass('show');
+            });
+            
+            window.addEventListener('offline', function() {
+                console.log('Connection lost');
+                updateConnectionStatus('disconnected');
+                $('#offline-indicator').addClass('show');
+            });
         });
+        
+        // Connection monitoring functions
+        function monitorConnection() {
+            const connectionStatus = $('#connection-status');
+            
+            // Check initial connection
+            if (navigator.onLine) {
+                updateConnectionStatus('connected');
+            } else {
+                updateConnectionStatus('disconnected');
+                $('#offline-indicator').addClass('show');
+            }
+            
+            // Monitor socket connection
+            if (typeof io !== 'undefined') {
+                const socket = io();
+                
+                socket.on('connect', function() {
+                    console.log('Socket connected');
+                    updateConnectionStatus('connected');
+                });
+                
+                socket.on('disconnect', function() {
+                    console.log('Socket disconnected');
+                    updateConnectionStatus('disconnected');
+                });
+                
+                socket.on('connect_error', function() {
+                    console.log('Socket connection error');
+                    updateConnectionStatus('disconnected');
+                });
+            }
+        }
+        
+        function updateConnectionStatus(status) {
+            const indicator = $('#connection-status');
+            indicator.removeClass('connected disconnected connecting');
+            indicator.addClass(status);
+            
+            // Update title to show connection status
+            const originalTitle = document.title.replace(/^\[.*?\]\s*/, '');
+            if (status === 'disconnected') {
+                document.title = '[Offline] ' + originalTitle;
+            } else {
+                document.title = originalTitle;
+            }
+        }
     </script>
 </body>
 
