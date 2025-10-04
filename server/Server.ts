@@ -165,10 +165,6 @@ export class HttpServer extends ProtoServer {
                 res.sendFile(path.join(process.cwd(), '/pages/manifest.json'));
             });
             
-            this.app.get('/sw.js', (req, res) => {
-                res.setHeader('Content-Type', 'application/javascript');
-                res.sendFile(path.join(process.cwd(), '/pages/sw.js'));
-            });
             RelayRoute.initRoutes(this.app);
             ConfigRoute.initRoutes(this.app);
             MessagesRoute.initRoutes(this.app);
@@ -338,10 +334,6 @@ export class HttpsServer extends HttpServer {
                 res.sendFile(path.join(process.cwd(), '/pages/manifest.json'));
             });
             
-            this.app.get('/sw.js', (req, res) => {
-                res.setHeader('Content-Type', 'application/javascript');
-                res.sendFile(path.join(process.cwd(), '/pages/sw.js'));
-            });
             RelayRoute.initRoutes(this.app);
             ConfigRoute.initRoutes(this.app);
             MessagesRoute.initRoutes(this.app);

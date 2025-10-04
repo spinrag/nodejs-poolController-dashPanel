@@ -35,12 +35,6 @@ If your browser supports it, you may see an **"Install App"** button appear in t
 - **Splash screen** on launch
 - **Standalone window** (no Safari/Chrome interface)
 
-### ✅ Offline Functionality
-- **Cached content** works without internet
-- **Offline indicator** shows connection status
-- **Automatic sync** when connection restored
-- **Background updates** when app reopens
-
 ### ✅ iOS Optimizations
 - **Touch-friendly** button sizes (44px minimum)
 - **Safe area support** for devices with notches
@@ -49,9 +43,9 @@ If your browser supports it, you may see an **"Install App"** button appear in t
 
 ### ✅ Enhanced Features
 - **Connection monitoring** with visual indicators
-- **Update notifications** for new versions
 - **Dark mode support** (iOS system preference)
 - **High contrast** accessibility support
+- **Real-time pool control** via Socket.IO connection
 
 ## Troubleshooting
 
@@ -61,30 +55,19 @@ If your browser supports it, you may see an **"Install App"** button appear in t
 - **Clear cache**: Try clearing browser cache and cookies
 - **Update browser**: Ensure you're using the latest version
 
-### App Not Working Offline?
-- **First visit**: The app needs to be visited online first to cache content
-- **Service worker**: Check browser console for service worker errors
-- **Storage**: Ensure device has sufficient storage space
-
 ### Connection Issues?
 - **Check network**: Ensure your device is on the same network as the pool controller
 - **Firewall**: Verify firewall settings allow connections
 - **Port access**: Confirm port 5150 is accessible
+- **Socket.IO**: Verify WebSocket connections are not blocked
 
 ## Advanced Configuration
 
 ### Custom App Icon
 To customize the app icon, replace the files in `/themes/icons/` with your own 180x180px PNG images.
 
-### Offline Data Storage
-The app automatically stores recent data locally for offline viewing. This includes:
-- Pool status information
-- Equipment states
-- Recent readings
-- Configuration settings
-
-### Background Sync
-When the app reconnects to the internet, it automatically syncs any offline changes made while disconnected.
+### Real-time Connection
+The app maintains a persistent WebSocket connection to your pool controller for real-time updates and control commands.
 
 ## Support
 

@@ -89,27 +89,7 @@
             $('<link id="cssref_theme" rel="stylesheet" type="text/css" href="themes/' + theme + '/theme.css" />').appendTo($('head')).attr('data-theme', theme);
             var bstyle = getStorage('dashBackgroundStyle', '');
             
-            // Register Service Worker for PWA functionality
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(function(registration) {
-                        console.log('Service Worker registered successfully:', registration.scope);
-                        
-                        // Check for updates
-                        registration.addEventListener('updatefound', function() {
-                            const newWorker = registration.installing;
-                            newWorker.addEventListener('statechange', function() {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    // New content is available, show update notification
-                                    showUpdateNotification();
-                                }
-                            });
-                        });
-                    })
-                    .catch(function(error) {
-                        console.log('Service Worker registration failed:', error);
-                    });
-            }
+            // PWA functionality without service worker (since app requires real-time connection)
             
             // PWA Installation prompt
             let deferredPrompt;
@@ -181,37 +161,10 @@
             }
         }
         
-        function showUpdateNotification() {
-            if (!$('#update-notification').length) {
-                $('<div id="update-notification" style="position: fixed; top: 50px; right: 10px; z-index: 1000; background: #4CAF50; color: white; padding: 15px; border-radius: 5px; max-width: 300px;">' +
-                    '<p>New version available!</p>' +
-                    '<button onclick="updateApp()" style="background: white; color: #4CAF50; border: none; padding: 5px 10px; border-radius: 3px; margin-right: 10px;">Update</button>' +
-                    '<button onclick="$(\'#update-notification\').remove()" style="background: transparent; color: white; border: 1px solid white; padding: 5px 10px; border-radius: 3px;">Later</button>' +
-                    '</div>')
-                    .appendTo('body');
-            }
-        }
-        
-        function updateApp() {
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistration().then(function(registration) {
-                    if (registration && registration.waiting) {
-                        registration.waiting.postMessage({type: 'SKIP_WAITING'});
-                        window.location.reload();
-                    }
-                });
-            }
-            $('#update-notification').remove();
-        }
     </script>
 </head>
 
 <body>
-    <!-- Offline indicator -->
-    <div id="offline-indicator" class="offline-indicator">
-        <span>You're offline. Some features may be limited.</span>
-    </div>
-    
     <!-- Connection status indicator -->
     <div id="connection-status" class="connection-status connected"></div>
     
@@ -258,17 +211,14 @@
             // Connection monitoring
             monitorConnection();
             
-            // Offline/Online event listeners
             window.addEventListener('online', function() {
                 console.log('Connection restored');
                 updateConnectionStatus('connected');
-                $('#offline-indicator').removeClass('show');
             });
             
             window.addEventListener('offline', function() {
                 console.log('Connection lost');
                 updateConnectionStatus('disconnected');
-                $('#offline-indicator').addClass('show');
             });
         });
         
@@ -281,7 +231,6 @@
                 updateConnectionStatus('connected');
             } else {
                 updateConnectionStatus('disconnected');
-                $('#offline-indicator').addClass('show');
             }
             
             // Monitor socket connection

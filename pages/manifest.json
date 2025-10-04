@@ -1,7 +1,7 @@
 {
   "name": "Pool Control Dashboard",
   "short_name": "Pool Control",
-  "description": "Pool Controller Dashboard - Control your pool equipment remotely",
+  "description": "Pool Controller Dashboard - Real-time pool equipment control",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
