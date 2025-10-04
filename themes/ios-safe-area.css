@@ -6,21 +6,31 @@
     margin-bottom: env(safe-area-inset-bottom);
     margin-left: env(safe-area-inset-left);
     margin-right: env(safe-area-inset-right);
+
+    /* Dark overlay behind status bar for better text visibility */
+    position: relative;
 }
 
-/* .ios-standalone .picHeader {
-    padding-top: calc(env(safe-area-inset-top) + 10px);
-} */
-
-/* Ensure main content doesn't overlap with status bar */
-/* .ios-standalone .dashOuter {
-    padding-top: env(safe-area-inset-top);
-} */
+.ios-standalone::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top);
+    background-color: #1f2937;
+    z-index: 1000;
+    pointer-events: none;
+}
 
 /* Fallback for older iOS versions that don't support env() */
 @supports not (padding: max(0px)) {
     .ios-standalone {
         margin-top: 20px; /* Approximate status bar height */
+    }
+
+    .ios-standalone::before {
+        height: 20px; /* Fixed height for older iOS */
     }
 }
 
