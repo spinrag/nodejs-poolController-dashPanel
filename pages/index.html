@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 
@@ -52,6 +52,8 @@
     <script type="text/javascript" src="scripts/bodies.js"></script>
     <script type="text/javascript" src="scripts/circuits.js"></script>
     <script type="text/javascript" src="scripts/pumps.js"></script>
+    <script type="text/javascript" src="scripts/valves.js"></script>
+    <script type="text/javascript" src="scripts/covers.js"></script>
     <script type="text/javascript" src="scripts/chemistry.js"></script>
     <script type="text/javascript" src="scripts/lightGroups.js"></script>
     <script type="text/javascript" src="scripts/schedules.js"></script>
@@ -63,8 +65,11 @@
     <script type="text/javascript" src="scripts/config/pumps.js"></script>
     <script type="text/javascript" src="scripts/config/valves.js"></script>
     <script type="text/javascript" src="scripts/config/schedules.js"></script>
+    <script type="text/javascript" src="scripts/config/vacation.js"></script>
     <script type="text/javascript" src="scripts/config/heaters.js"></script>
+    <script type="text/javascript" src="scripts/config/covers.js"></script>
     <script type="text/javascript" src="scripts/config/chemistry.js"></script>
+    <script type="text/javascript" src="scripts/config/remotes.js"></script>
     <script type="text/javascript" src="scripts/config/controller.js"></script>
     <script type="text/javascript" src="scripts/uploader.js"></script>
     <link rel="stylesheet" type="text/css" href="jquery-ui/jquery-ui.css" />
@@ -74,6 +79,7 @@
 
     <link id="cssref_intellibrite" rel="stylesheet" type="text/css" href="themes/intellibrite.css" />
     <link id="cssref_widgets" rel="stylesheet" type="text/css" href="themes/widgets.css" />
+    <link id="cssref_controller" rel="stylesheet" type="text/css" href="themes/controller.css" />
     <link id="cssref_config" rel="stylesheet" type="text/css" href="themes/configPage.css" />
     <link id="cssref_dash" rel="stylesheet" type="text/css" href="themes/dashboard.css" />
     <link id="cssref_ios_safe" rel="stylesheet" type="text/css" href="themes/ios-safe-area.css" />
@@ -147,7 +153,7 @@
 </head>
 
 <body>
-    <div class="dashOuter picDashboard" data-panel="dashboard">
+    <div class="dashOuter picDashboard" data-panel="dashboard" role="main" aria-label="Pool Control Dashboard">
         <header class="picHeader">
             <div class="picController picControlPanel control-panel" style="display:block;"></div>
         </header>
@@ -160,6 +166,8 @@
                 <div class="picCircuits picControlPanel control-panel"></div>
                 <div class="picLights picControlPanel control-panel"></div>
                 <div class="picFilters picControlPanel control-panel"></div>
+                <div class="picValves picControlPanel control-panel"></div>
+                <div class="picCovers picControlPanel control-panel"></div>
                 <div class="picVirtualCircuits picControlPanel control-panel"></div>
             </div>
             <div class="container2"></div>
@@ -186,6 +194,8 @@
             $('div.picChemistry').chemistry();
             $('div.picSchedules').schedules();
             $('div.picFilters').bodyFilters();
+            $('div.picValves').valves();
+            $('div.picCovers').covers();
         });
     </script>
 </body>
