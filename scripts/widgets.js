@@ -13,6 +13,42 @@ if (typeof String.prototype.endsWith !== 'function') {
 }
 window.console = window.console || (function () { var c = {}; c.log = c.warn = c.debug = c.info = c.error = c.time = c.dir = c.profile = c.clear = c.exception = c.trace = c.assert = function (s) { }; return c; })();
 window.console.error = window.console.error || (function () { })();
+// --- Cloudflare Access (auth-proxy) re-auth self-heal -------------------------
+// When the dash is served behind an auth proxy (e.g. Cloudflare Access) the live
+// socket stalls once the auth session expires: a background socket transport
+// cannot perform the interactive login that only a top-level navigation can, so
+// the page looks authed while live data silently dies. We count consecutive
+// socket connect failures, then probe a tiny same-origin resource WITHOUT
+// following redirects to tell "needs re-auth" (proxy 3xx -> opaqueredirect, or
+// 401/403) from "backend is down" (network error / normal 200). On a confirmed
+// auth redirect we do a full-page reload, which triggers the interactive login
+// and hands the freshly-issued cookie to the reconnecting socket.
+window.njspcAccessReauth = (function () {
+    var failures = 0;
+    var FAIL_THRESHOLD = 4;     // consecutive socket connect errors before we probe
+    var MIN_RELOAD_MS = 60000;  // never reload more than once per 60s (loop guard)
+    function lastReload() { try { return parseInt(sessionStorage.getItem('njspcReauthAt') || '0', 10); } catch (e) { return 0; } }
+    function stampReload(v) { try { sessionStorage.setItem('njspcReauthAt', String(v)); } catch (e) { } }
+    function onConnect() { failures = 0; }
+    function onConnectError() {
+        failures++;
+        if (failures < FAIL_THRESHOLD || typeof fetch !== 'function') return;
+        var now = (new Date()).getTime();
+        if (now - lastReload() < MIN_RELOAD_MS) return; // rate-limit across reloads
+        var url = window.location.pathname.replace(/[^/]*$/, '') + 'manifest.json?reauth=' + now;
+        fetch(url, { cache: 'no-store', redirect: 'manual' })
+            .then(function (resp) {
+                if (resp.type === 'opaqueredirect' || resp.status === 0 || resp.status === 401 || resp.status === 403) {
+                    console.log('njspc: auth session expired, reloading to re-authenticate');
+                    stampReload(now);
+                    window.location.reload();
+                }
+                // else: reachable + authed -> socket trouble is elsewhere; keep retrying.
+            })
+            .catch(function () { /* network/backend down -> not an auth wall; don't reload-loop */ });
+    }
+    return { onConnect: onConnect, onConnectError: onConnectError };
+})();
 if (!Date.parseISO) {
     Date.parseISO = function (sDate) {
         if (typeof sDate === 'undefined') return new Date();

@@ -308,6 +308,9 @@
                 console.log({ msg: 'Connecting socket through proxy', url: window.location.origin.toString(), path: path });
                 o.socket = io(window.location.origin.toString(), { path: path, reconnectionDelay: 2000, reconnection: true, reconnectionDelayMax: 20000, upgrade: true });
             }
+            // Self-heal when behind an auth proxy whose session has expired.
+            o.socket.on('connect', function () { njspcAccessReauth.onConnect(); });
+            o.socket.on('connect_error', function () { njspcAccessReauth.onConnectError(); });
             o.socket.on('sysmessages', function (data) {
                 console.log({ evt: 'sysmessages', data: data, controls: $('div.picSysMessages') });
                 $('div.picSysMessages').each(function () {
